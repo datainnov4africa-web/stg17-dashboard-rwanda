@@ -1,0 +1,3757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>National statistics dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --green:#00A86A; --deep:#00704A; --forest:#00553A; --gold:#F5C242; --ochre:#D49A00;
+    --teal:#0E7C86; --terracotta:#C4621D; --brick:#B83B2E;
+    --ink:#231F20; --slate:#5E6964; --mist:#F4F7F5; --mint:#E8F5EF; --sage:#D5DED9;
+    --shadow:0 1px 2px rgba(35,31,32,.06);
+    --maxw:1160px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:#fff; color:var(--ink);
+    font-family:Calibri,Carlito,"Segoe UI",system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .topbar{height:5px;background:#00A86A;position:relative}
+  .topbar::before{content:"";position:absolute;left:0;top:0;height:5px;width:130px;background:var(--gold)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ---------- hero ---------- */
+  header.hero{
+    background:linear-gradient(115deg,#00553A 0%,#00704A 48%,#00A86A 100%);
+    color:#fff;padding:34px 0 0;position:relative;overflow:hidden;
+  }
+  header.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--gold)}
+  .hero-arcs{position:absolute;right:-90px;top:-120px;width:420px;height:420px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.16);pointer-events:none}
+  .hero-arcs::before{content:"";position:absolute;inset:58px;border-radius:50%;border:1px solid rgba(255,255,255,.13)}
+  .hero-arcs::after{content:"";position:absolute;inset:118px;border-radius:50%;border:1px solid rgba(255,255,255,.10)}
+  .hero-row{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+  h1{font-size:34px;line-height:1.15;margin:0 0 8px;font-weight:700;max-width:22ch}
+  .hero-sub{font-size:16px;color:#E6F6EE;margin:0;max-width:60ch}
+  .hero-meta{margin:16px 0 0;font-size:13px;color:#CFEADD;display:flex;gap:18px;flex-wrap:wrap}
+  .hero-meta a{color:#fff;text-decoration:underline;text-underline-offset:2px}
+
+  .lang{display:inline-flex;border:1px solid rgba(255,255,255,.45);border-radius:999px;overflow:hidden;flex:0 0 auto}
+  .lang button{
+    background:transparent;border:0;color:#fff;font:inherit;font-size:13px;font-weight:700;
+    padding:7px 16px;cursor:pointer;letter-spacing:.5px;
+  }
+  .lang button[aria-pressed="true"]{background:var(--gold);color:var(--forest)}
+  .lang button:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+
+  /* ---------- tabs ---------- */
+  nav.tabs{background:#fff;border-bottom:1px solid var(--sage);position:sticky;top:0;z-index:20;
+    box-shadow:0 1px 0 rgba(35,31,32,.03)}
+  .tabs-inner{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin}
+  nav.tabs button{
+    background:none;border:0;border-bottom:3px solid transparent;color:var(--slate);
+    font:inherit;font-size:14.5px;font-weight:600;padding:14px 16px;cursor:pointer;white-space:nowrap;
+  }
+  nav.tabs button[aria-selected="true"]{color:var(--deep);border-bottom-color:var(--green)}
+  nav.tabs button:hover{color:var(--ink)}
+  nav.tabs button:focus-visible{outline:2px solid var(--green);outline-offset:-3px}
+
+  main{padding:28px 0 0}
+  .panel[hidden]{display:none}
+  h2{font-size:21px;margin:0 0 4px;font-weight:700}
+  .lede{color:var(--slate);font-size:14.5px;margin:0 0 20px;max-width:75ch}
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin:0 0 26px}
+  .kpi{background:var(--mist);border:1px solid var(--sage);border-radius:10px;padding:16px 18px}
+  .kpi.hi{background:var(--mint);border-color:var(--green);border-width:1.5px}
+  .kpi .lbl{font-size:12.5px;color:var(--slate);font-weight:600;margin:0 0 6px;min-height:2.6em}
+  .kpi .val{font-size:34px;font-weight:700;line-height:1;color:var(--deep);font-variant-numeric:tabular-nums}
+  .kpi .val small{font-size:15px;font-weight:600;margin-left:3px;color:var(--slate)}
+  .kpi .delta{font-size:12.5px;margin-top:7px;font-weight:600}
+  .delta.up{color:var(--brick)} .delta.down{color:var(--green)} .delta.flat{color:var(--slate)}
+
+  /* ---------- filters ---------- */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 18px}
+  .filters .flabel{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--deep);margin-right:4px}
+  .chip{
+    border:1px solid var(--sage);background:#fff;color:var(--slate);border-radius:999px;
+    font:inherit;font-size:13px;padding:5px 13px;cursor:pointer;
+  }
+  .chip[aria-pressed="true"]{background:var(--mint);border-color:var(--green);color:var(--deep);font-weight:700}
+  .chip:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+  .chip.reset{border-style:dashed}
+
+  /* ---------- cards & charts ---------- */
+  .grid{display:grid;gap:18px}
+  .grid.two{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
+  .card{border:1px solid var(--sage);border-radius:10px;padding:18px 18px 12px;background:#fff;box-shadow:var(--shadow)}
+  .card h3{margin:0 0 2px;font-size:15.5px;font-weight:700}
+  .card .sub{margin:0 0 14px;font-size:12.5px;color:var(--slate)}
+  .chartbox{position:relative;height:330px}
+  .chartbox.tall{height:390px}
+  .src{font-size:11.5px;font-style:italic;color:var(--slate);margin:10px 0 0;border-top:1px solid var(--mist);padding-top:8px}
+
+  /* ---------- table ---------- */
+  .tablebar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+  .tablebar input[type=search]{
+    flex:1 1 240px;min-width:200px;font:inherit;font-size:14px;padding:8px 12px;
+    border:1px solid var(--sage);border-radius:8px;background:var(--mist);color:var(--ink)
+  }
+  .tablebar input:focus{outline:2px solid var(--green);outline-offset:-1px;background:#fff}
+  .btn{
+    font:inherit;font-size:13.5px;font-weight:600;padding:8px 15px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--deep);background:var(--deep);color:#fff;
+  }
+  .btn.ghost{background:#fff;color:var(--deep)}
+  .btn:hover{background:var(--forest);border-color:var(--forest);color:#fff}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .tscroll{overflow:auto;max-height:68vh;border:1px solid var(--sage);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:720px}
+  thead th{
+    background:var(--deep);color:#fff;text-align:left;padding:10px 12px;font-weight:700;
+    position:sticky;top:0;cursor:pointer;white-space:nowrap;font-size:12.5px
+  }
+  thead th[aria-sort="ascending"]::after{content:" ▲";font-size:9px}
+  thead th[aria-sort="descending"]::after{content:" ▼";font-size:9px}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--sage);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--mist)}
+  tbody tr.open{background:var(--mint)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .badge.ok{background:var(--mint);color:var(--deep);border:1px solid var(--green)}
+  .badge.warn{background:#FDF3DC;color:#8A6400;border:1px solid var(--ochre)}
+  .prov{background:var(--mint)!important}
+  .prov td{font-size:12.5px;color:var(--slate);padding:12px 16px 14px}
+  .prov q{display:block;font-style:italic;color:var(--ink);border-left:3px solid var(--green);
+    padding:6px 0 6px 12px;margin:6px 0 0;quotes:none;white-space:pre-wrap}
+  .rowbtn{background:none;border:0;padding:0;cursor:pointer;color:var(--deep);font:inherit;
+    font-size:13.5px;font-weight:600;text-align:left;text-decoration:underline;text-underline-offset:3px;
+    text-decoration-color:var(--sage)}
+  .rowbtn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+  .empty{padding:26px;text-align:center;color:var(--slate);font-size:14px}
+
+  /* ---------- callout ---------- */
+  .callout{border:1px solid var(--ochre);background:#FDF6E4;border-radius:10px;padding:14px 18px;margin:0 0 20px}
+  .callout h3{margin:0 0 4px;font-size:14.5px;color:#8A6400}
+  .callout p{margin:0;font-size:13.5px;color:var(--ink)}
+  .notes{border:1px solid var(--sage);border-radius:10px;padding:18px 20px;background:var(--mist)}
+  .notes h3{margin:0 0 6px;font-size:14.5px}
+  .notes p{margin:0 0 12px;font-size:13.5px;color:var(--slate);max-width:80ch}
+  .notes p:last-child{margin-bottom:0}
+  .notes code{background:#fff;border:1px solid var(--sage);border-radius:4px;padding:1px 5px;font-size:12.5px}
+
+  footer{margin-top:40px;border-top:1px solid var(--sage);background:var(--mist);padding:24px 0 34px}
+  footer .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
+  footer h4{margin:0 0 6px;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--deep)}
+  footer p{margin:0;font-size:12.5px;color:var(--slate);line-height:1.6}
+  footer a{color:var(--deep)}
+  .stamp{margin-top:18px;font-size:11.5px;color:var(--slate);border-top:1px solid var(--sage);padding-top:14px}
+
+  @media (max-width:620px){
+    h1{font-size:26px} .kpi .val{font-size:28px} .chartbox{height:280px} .wrap{padding:0 16px}
+  }
+  /* the page is read on phones and inside viewers that have their own theme */
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ink:#E8EFEB; --slate:#9FADA7; --mist:#141D19; --mint:#12302A; --sage:#2B3A34;
+      --deep:#3ED69C; --green:#3ED69C; --ochre:#E8B34A;
+    }
+    :root:not([data-theme="light"]) body{background:#0B1310}
+    :root:not([data-theme="light"]) .card,
+    :root:not([data-theme="light"]) nav.tabs,
+    :root:not([data-theme="light"]) .tscroll{background:#101A16}
+    :root:not([data-theme="light"]) tbody tr:nth-child(even){background:#141D19}
+    :root:not([data-theme="light"]) thead th{background:#123328;color:#E8EFEB}
+    :root:not([data-theme="light"]) .btn{background:#123328;border-color:#3ED69C;color:#E8EFEB}
+    :root:not([data-theme="light"]) .btn.ghost{background:transparent;color:#3ED69C}
+    :root:not([data-theme="light"]) .chip{background:transparent}
+    :root:not([data-theme="light"]) .callout{background:#241D0F;border-color:#E8B34A}
+    :root:not([data-theme="light"]) .callout h3{color:#E8B34A}
+    :root:not([data-theme="light"]) .badge.warn{background:#241D0F;color:#E8B34A}
+    :root:not([data-theme="light"]) .tablebar input[type=search]{background:#141D19;color:#E8EFEB}
+    :root:not([data-theme="light"]) footer{background:#101A16}
+    :root:not([data-theme="light"]) #synthBar{background:#241D0F!important;color:#E8B34A!important}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media print{nav.tabs,.lang,.filters,.tablebar{display:none}.panel[hidden]{display:block!important}}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<div id="synthBar" hidden style="background:#FDF3DC;border-bottom:1px solid var(--ochre);
+     color:#8A6400;font-size:12.5px;font-weight:700;text-align:center;padding:7px 16px"></div>
+
+<header class="hero">
+  <div class="hero-arcs" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="hero-row">
+      <div>
+        <p class="kicker" data-i18n="kicker"></p>
+        <h1 data-i18n="title"></h1>
+        <p class="hero-sub" data-i18n="subtitle"></p>
+      </div>
+      <div class="lang" role="group" aria-label="Language / Langue">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="fr" aria-pressed="false">FR</button>
+      </div>
+    </div>
+    <p class="hero-meta">
+      <span data-i18n="publisher"></span>
+      <span data-i18n="period"></span>
+      <span><a id="srcLink" href="#" target="_blank" rel="noopener" data-i18n="sourceDoc"></a></span>
+    </p>
+    <div style="height:26px"></div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap tabs-inner" id="tabs" role="tablist"></div>
+</nav>
+
+<main class="wrap" id="panels"></main>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><h4 data-i18n="fSource"></h4><p id="fSourceBody"></p></div>
+      <div><h4 data-i18n="fLicence"></h4><p id="fLicenceBody"></p></div>
+      <div><h4 data-i18n="fBuilt"></h4><p data-i18n="fBuiltBody"></p></div>
+      <div><h4 data-i18n="fContact"></h4><p id="fContactBody"></p></div>
+    </div>
+    <p class="stamp" data-i18n="stamp"></p>
+  </div>
+</footer>
+
+
+<script>
+const DATA = /*__DATA__*/{
+ "meta": {
+  "publisher": {
+   "en": "National Institute of Statistics",
+   "fr": "Institut National de la Statistique"
+  },
+  "country": {
+   "en": "",
+   "fr": ""
+  },
+  "docTitle": {
+   "en": "STATISTICS OF RWANDA",
+   "fr": "STATISTICS OF RWANDA"
+  },
+  "period": {
+   "en": "",
+   "fr": ""
+  },
+  "sourceUrl": "https://statistics.gov.rw/sites/default/files/documents/2026-09/CONSUMER%20PRICE%20INDEX%20%20%28CPI%29%20AUGUST%202026.pdf",
+  "licence": {
+   "en": "Source data: as published by the institute. Dashboard code: MIT.",
+   "fr": "Données source : telles que publiées par l'institut. Code : MIT."
+  },
+  "contact": {
+   "en": "Built at the STG17 technical workshop, lab 02.",
+   "fr": "Réalisé lors de l'atelier technique STG17, labo 02."
+  },
+  "defaultLang": "fr",
+  "synthetic": false,
+  "generated": "2026-09-29"
+ },
+ "areas": [
+  {
+   "id": "00-general-index",
+   "fr": "00 GENERAL INDEX",
+   "en": "00 GENERAL INDEX"
+  },
+  {
+   "id": "01-food-and-non-alcoholic-beverages",
+   "fr": "01 Food and non-alcoholic beverages",
+   "en": "01 Food and non-alcoholic beverages"
+  },
+  {
+   "id": "01-1-1-bread-and-cereals",
+   "fr": "01.1.1 Bread and cereals",
+   "en": "01.1.1 Bread and cereals"
+  },
+  {
+   "id": "01-1-2-meat",
+   "fr": "01.1.2 Meat",
+   "en": "01.1.2 Meat"
+  },
+  {
+   "id": "01-1-4-milk-cheese-and-eggs",
+   "fr": "01.1.4 Milk cheese and eggs",
+   "en": "01.1.4 Milk cheese and eggs"
+  },
+  {
+   "id": "01-1-7-vegetables",
+   "fr": "01.1.7 Vegetables",
+   "en": "01.1.7 Vegetables"
+  },
+  {
+   "id": "01-2-non-alcoholic-beverages",
+   "fr": "01.2 Non-alcoholic beverages",
+   "en": "01.2 Non-alcoholic beverages"
+  },
+  {
+   "id": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "fr": "02 Alcoholic beverages tobacco and narcotics",
+   "en": "02 Alcoholic beverages tobacco and narcotics"
+  },
+  {
+   "id": "03-clothing-and-footwear",
+   "fr": "03 Clothing and footwear",
+   "en": "03 Clothing and footwear"
+  },
+  {
+   "id": "04-housing-water-electricity-gas-and-other-fuels",
+   "fr": "04 Housing water, electricity, gas and other fuels",
+   "en": "04 Housing water, electricity, gas and other fuels"
+  },
+  {
+   "id": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "fr": "05 Furnishings household equipment and routine household maintenance",
+   "en": "05 Furnishings household equipment and routine household maintenance"
+  },
+  {
+   "id": "06-health",
+   "fr": "06 Health",
+   "en": "06 Health"
+  },
+  {
+   "id": "07-transport",
+   "fr": "07 Transport",
+   "en": "07 Transport"
+  },
+  {
+   "id": "08-communication",
+   "fr": "08 Communication",
+   "en": "08 Communication"
+  },
+  {
+   "id": "09-recreation-and-culture",
+   "fr": "09 Recreation and culture",
+   "en": "09 Recreation and culture"
+  },
+  {
+   "id": "10-education",
+   "fr": "10 Education",
+   "en": "10 Education"
+  },
+  {
+   "id": "11-restaurants-and-hotels",
+   "fr": "11 Restaurants and hotels",
+   "en": "11 Restaurants and hotels"
+  },
+  {
+   "id": "12-miscellaneous-goods-and-services",
+   "fr": "12 Miscellaneous goods and services",
+   "en": "12 Miscellaneous goods and services"
+  }
+ ],
+ "kpis": [
+  {
+   "labels": {
+    "en": "CPI change – July 2026 (General Index)",
+    "fr": "Variation de l'IPC – Juillet 2026 (indice général)"
+   },
+   "value": 2.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "delta": null,
+   "deltaLabel": {
+    "en": "vs None",
+    "fr": "vs None"
+   },
+   "good": "down",
+   "highlight": false
+  },
+  {
+   "labels": {
+    "en": "One‑month CPI change – Food & non‑alcoholic beverages",
+    "fr": "Variation de l'IPC sur 1 mois – Alimentation et boissons non alcoolisées"
+   },
+   "value": 2.2,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "delta": null,
+   "deltaLabel": {
+    "en": "vs None",
+    "fr": "vs None"
+   },
+   "good": "down",
+   "highlight": false
+  },
+  {
+   "labels": {
+    "en": "Twelve‑month CPI change – Food & non‑alcoholic beverages",
+    "fr": "Variation de l'IPC sur 12 mois – Alimentation et boissons non alcoolisées"
+   },
+   "value": 7.9,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "delta": null,
+   "deltaLabel": {
+    "en": "vs None",
+    "fr": "vs None"
+   },
+   "good": "down",
+   "highlight": false
+  }
+ ],
+ "series": {
+  "weights": {
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "periods": [
+    "Weights"
+   ],
+   "values": {
+    "00-general-index": [
+     100.0
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     39.0
+    ],
+    "01-1-1-bread-and-cereals": [
+     7.0
+    ],
+    "01-1-2-meat": [
+     2.0
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     1.0
+    ],
+    "01-1-7-vegetables": [
+     18.0
+    ],
+    "01-2-non-alcoholic-beverages": [
+     1.0
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     7.0
+    ],
+    "03-clothing-and-footwear": [
+     5.0
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     18.0
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     3.0
+    ],
+    "06-health": [
+     1.0
+    ],
+    "07-transport": [
+     8.0
+    ],
+    "08-communication": [
+     2.0
+    ],
+    "09-recreation-and-culture": [
+     2.0
+    ],
+    "10-education": [
+     2.0
+    ],
+    "11-restaurants-and-hotels": [
+     6.0
+    ],
+    "12-miscellaneous-goods-and-services": [
+     5.0
+    ]
+   }
+  },
+  "aug_25": {
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "periods": [
+    "Aug-25"
+   ],
+   "values": {
+    "00-general-index": [
+     208.3
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     254.4
+    ],
+    "01-1-1-bread-and-cereals": [
+     221.8
+    ],
+    "01-1-2-meat": [
+     316.9
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     220.7
+    ],
+    "01-1-7-vegetables": [
+     268.5
+    ],
+    "01-2-non-alcoholic-beverages": [
+     205.6
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     248.6
+    ],
+    "03-clothing-and-footwear": [
+     173.1
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     155.3
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     174.1
+    ],
+    "06-health": [
+     186.6
+    ],
+    "07-transport": [
+     180.8
+    ],
+    "08-communication": [
+     123.3
+    ],
+    "09-recreation-and-culture": [
+     161.8
+    ],
+    "10-education": [
+     193.6
+    ],
+    "11-restaurants-and-hotels": [
+     188.5
+    ],
+    "12-miscellaneous-goods-and-services": [
+     149.7
+    ]
+   }
+  },
+  "jul_26": {
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "periods": [
+    "Jul-26"
+   ],
+   "values": {
+    "00-general-index": [
+     235.3
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     283.7
+    ],
+    "01-1-1-bread-and-cereals": [
+     228.7
+    ],
+    "01-1-2-meat": [
+     409.5
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     230.1
+    ],
+    "01-1-7-vegetables": [
+     308.9
+    ],
+    "01-2-non-alcoholic-beverages": [
+     222.2
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     272.8
+    ],
+    "03-clothing-and-footwear": [
+     181.1
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     186.9
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     189.3
+    ],
+    "06-health": [
+     191.5
+    ],
+    "07-transport": [
+     230.3
+    ],
+    "08-communication": [
+     125.6
+    ],
+    "09-recreation-and-culture": [
+     179.9
+    ],
+    "10-education": [
+     216.6
+    ],
+    "11-restaurants-and-hotels": [
+     211.0
+    ],
+    "12-miscellaneous-goods-and-services": [
+     162.1
+    ]
+   }
+  },
+  "aug_26": {
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "periods": [
+    "Aug-26"
+   ],
+   "values": {
+    "00-general-index": [
+     241.4
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     296.8
+    ],
+    "01-1-1-bread-and-cereals": [
+     231.0
+    ],
+    "01-1-2-meat": [
+     420.0
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     232.0
+    ],
+    "01-1-7-vegetables": [
+     329.2
+    ],
+    "01-2-non-alcoholic-beverages": [
+     223.8
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     269.0
+    ],
+    "03-clothing-and-footwear": [
+     181.7
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     186.1
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     191.8
+    ],
+    "06-health": [
+     191.5
+    ],
+    "07-transport": [
+     230.6
+    ],
+    "08-communication": [
+     157.4
+    ],
+    "09-recreation-and-culture": [
+     180.5
+    ],
+    "10-education": [
+     216.6
+    ],
+    "11-restaurants-and-hotels": [
+     214.5
+    ],
+    "12-miscellaneous-goods-and-services": [
+     165.7
+    ]
+   }
+  },
+  "on_jul_2026": {
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "periods": [
+    "on Jul. 2026"
+   ],
+   "values": {
+    "00-general-index": [
+     2.6
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     4.6
+    ],
+    "01-1-1-bread-and-cereals": [
+     1.0
+    ],
+    "01-1-2-meat": [
+     2.5
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     0.8
+    ],
+    "01-1-7-vegetables": [
+     6.6
+    ],
+    "01-2-non-alcoholic-beverages": [
+     0.7
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     -1.4
+    ],
+    "03-clothing-and-footwear": [
+     0.4
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     -0.4
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     1.4
+    ],
+    "06-health": [
+     0.0
+    ],
+    "07-transport": [
+     0.1
+    ],
+    "08-communication": [
+     25.3
+    ],
+    "09-recreation-and-culture": [
+     0.4
+    ],
+    "10-education": [
+     0.0
+    ],
+    "11-restaurants-and-hotels": [
+     1.6
+    ],
+    "12-miscellaneous-goods-and-services": [
+     2.3
+    ]
+   }
+  },
+  "on_aug_2025": {
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "periods": [
+    "on Aug. 2025"
+   ],
+   "values": {
+    "00-general-index": [
+     15.9
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     16.7
+    ],
+    "01-1-1-bread-and-cereals": [
+     4.2
+    ],
+    "01-1-2-meat": [
+     32.5
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     5.1
+    ],
+    "01-1-7-vegetables": [
+     22.6
+    ],
+    "01-2-non-alcoholic-beverages": [
+     8.8
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     8.2
+    ],
+    "03-clothing-and-footwear": [
+     5.0
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     19.9
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     10.2
+    ],
+    "06-health": [
+     2.7
+    ],
+    "07-transport": [
+     27.5
+    ],
+    "08-communication": [
+     27.6
+    ],
+    "09-recreation-and-culture": [
+     11.6
+    ],
+    "10-education": [
+     11.8
+    ],
+    "11-restaurants-and-hotels": [
+     13.7
+    ],
+    "12-miscellaneous-goods-and-services": [
+     10.7
+    ]
+   }
+  },
+  "one_month": {
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "periods": [
+    "1 month"
+   ],
+   "values": {
+    "00-general-index": [
+     2.6
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     2.2
+    ],
+    "01-1-1-bread-and-cereals": [
+     0.1
+    ],
+    "01-1-2-meat": [
+     0.1
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     0.0
+    ],
+    "01-1-7-vegetables": [
+     1.6
+    ],
+    "01-2-non-alcoholic-beverages": [
+     0.0
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     -0.1
+    ],
+    "03-clothing-and-footwear": [
+     0.0
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     -0.1
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     0.0
+    ],
+    "06-health": [
+     0.0
+    ],
+    "07-transport": [
+     0.0
+    ],
+    "08-communication": [
+     0.3
+    ],
+    "09-recreation-and-culture": [
+     0.0
+    ],
+    "10-education": [
+     0.0
+    ],
+    "11-restaurants-and-hotels": [
+     0.1
+    ],
+    "12-miscellaneous-goods-and-services": [
+     0.1
+    ]
+   }
+  },
+  "twelve_months": {
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "periods": [
+    "12 months"
+   ],
+   "values": {
+    "00-general-index": [
+     15.9
+    ],
+    "01-food-and-non-alcoholic-beverages": [
+     7.9
+    ],
+    "01-1-1-bread-and-cereals": [
+     0.3
+    ],
+    "01-1-2-meat": [
+     0.9
+    ],
+    "01-1-4-milk-cheese-and-eggs": [
+     0.1
+    ],
+    "01-1-7-vegetables": [
+     5.4
+    ],
+    "01-2-non-alcoholic-beverages": [
+     0.1
+    ],
+    "02-alcoholic-beverages-tobacco-and-narcotics": [
+     0.7
+    ],
+    "03-clothing-and-footwear": [
+     0.2
+    ],
+    "04-housing-water-electricity-gas-and-other-fuels": [
+     2.7
+    ],
+    "05-furnishings-household-equipment-and-routine-household-maintenance": [
+     0.3
+    ],
+    "06-health": [
+     0.0
+    ],
+    "07-transport": [
+     1.8
+    ],
+    "08-communication": [
+     0.4
+    ],
+    "09-recreation-and-culture": [
+     0.2
+    ],
+    "10-education": [
+     0.2
+    ],
+    "11-restaurants-and-hotels": [
+     0.8
+    ],
+    "12-miscellaneous-goods-and-services": [
+     0.4
+    ]
+   }
+  }
+ },
+ "views": [
+  {
+   "id": "weights",
+   "chart": "bar",
+   "tab": {
+    "en": "Weights",
+    "fr": "Poids"
+   },
+   "title": {
+    "en": "Weights of CPI components",
+    "fr": "Poids des composantes de l'IPC"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Shows the relative weight of each component in the CPI.",
+    "fr": "Présente le poids relatif de chaque composante de l'IPC."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  },
+  {
+   "id": "aug_25",
+   "chart": "bar",
+   "tab": {
+    "en": "Aug‑25",
+    "fr": "Août‑25"
+   },
+   "title": {
+    "en": "CPI values – August 2025",
+    "fr": "Valeurs de l'IPC – Août 2025"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Displays CPI values for each component in August 2025.",
+    "fr": "Affiche les valeurs de l'IPC pour chaque composante en août 2025."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  },
+  {
+   "id": "jul_26",
+   "chart": "bar",
+   "tab": {
+    "en": "Jul‑26",
+    "fr": "Juil‑26"
+   },
+   "title": {
+    "en": "CPI values – July 2026",
+    "fr": "Valeurs de l'IPC – Juillet 2026"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Displays CPI values for each component in July 2026.",
+    "fr": "Affiche les valeurs de l'IPC pour chaque composante en juillet 2026."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  },
+  {
+   "id": "aug_26",
+   "chart": "bar",
+   "tab": {
+    "en": "Aug‑26",
+    "fr": "Août‑26"
+   },
+   "title": {
+    "en": "CPI values – August 2026",
+    "fr": "Valeurs de l'IPC – Août 2026"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Displays CPI values for each component in August 2026.",
+    "fr": "Affiche les valeurs de l'IPC pour chaque composante en août 2026."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  },
+  {
+   "id": "on_jul_2026",
+   "chart": "bar",
+   "tab": {
+    "en": "on Jul. 2026",
+    "fr": "le juil. 2026"
+   },
+   "title": {
+    "en": "CPI percentage change – July 2026",
+    "fr": "Variation en pourcentage de l'IPC – Juillet 2026"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Shows the percentage change of each component in July 2026.",
+    "fr": "Présente la variation en pourcentage de chaque composante en juillet 2026."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  },
+  {
+   "id": "on_aug_2025",
+   "chart": "bar",
+   "tab": {
+    "en": "on Aug. 2025",
+    "fr": "le août 2025"
+   },
+   "title": {
+    "en": "CPI percentage change – August 2025",
+    "fr": "Variation en pourcentage de l'IPC – Août 2025"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Shows the percentage change of each component in August 2025.",
+    "fr": "Présente la variation en pourcentage de chaque composante en août 2025."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  },
+  {
+   "id": "one_month",
+   "chart": "bar",
+   "tab": {
+    "en": "1 month",
+    "fr": "1 mois"
+   },
+   "title": {
+    "en": "One‑month CPI change",
+    "fr": "Variation de l'IPC sur un mois"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Shows the CPI change over the last month for each component.",
+    "fr": "Présente la variation de l'IPC sur le dernier mois pour chaque composante."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  },
+  {
+   "id": "twelve_months",
+   "chart": "bar",
+   "tab": {
+    "en": "12 months",
+    "fr": "12 mois"
+   },
+   "title": {
+    "en": "Twelve‑month CPI change",
+    "fr": "Variation de l'IPC sur douze mois"
+   },
+   "sub": {
+    "en": "",
+    "fr": ""
+   },
+   "lede": {
+    "en": "Shows the CPI change over the past twelve months for each component.",
+    "fr": "Présente la variation de l'IPC sur les douze derniers mois pour chaque composante."
+   },
+   "src": {
+    "en": "National Institute of Statistics",
+    "fr": "Institut national de la statistique"
+   }
+  }
+ ],
+ "facts": [
+  {
+   "indicator": "weights",
+   "area": "00-general-index",
+   "period": "Weights",
+   "value": 100.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "00-general-index",
+   "period": "Aug-25",
+   "value": 208.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "00-general-index",
+   "period": "Jul-26",
+   "value": 235.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "00-general-index",
+   "period": "Aug-26",
+   "value": 241.4,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "00-general-index",
+   "period": "on Jul. 2026",
+   "value": 2.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "00-general-index",
+   "period": "on Aug. 2025",
+   "value": 15.9,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "00-general-index",
+   "period": "1 month",
+   "value": 2.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "00-general-index",
+   "period": "12 months",
+   "value": 15.9,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "00 GENERAL INDEX 100% 208.3 235.3 241.4 2.6% 15.9% 2.6% 15.9%",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "weights",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "Weights",
+   "value": 39.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "Aug-25",
+   "value": 254.4,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "Jul-26",
+   "value": 283.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "Aug-26",
+   "value": 296.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "on Jul. 2026",
+   "value": 4.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "on Aug. 2025",
+   "value": 16.7,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "1 month",
+   "value": 2.2,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "01-food-and-non-alcoholic-beverages",
+   "period": "12 months",
+   "value": 7.9,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01 Food and non-alcoholic beverages 39% 254.4 283.7 296.8 4.6% 16.7% 2.2 7.9",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "Weights",
+   "value": 7.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "Aug-25",
+   "value": 221.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "Jul-26",
+   "value": 228.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "Aug-26",
+   "value": 231.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "on Jul. 2026",
+   "value": 1.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "on Aug. 2025",
+   "value": 4.2,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "1 month",
+   "value": 0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "01-1-1-bread-and-cereals",
+   "period": "12 months",
+   "value": 0.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.1 Bread and cereals 7% 221.8 228.7 231.0 1.0% 4.2% 0.1 0.3",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "01-1-2-meat",
+   "period": "Weights",
+   "value": 2.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "01-1-2-meat",
+   "period": "Aug-25",
+   "value": 316.9,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "01-1-2-meat",
+   "period": "Jul-26",
+   "value": 409.5,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "01-1-2-meat",
+   "period": "Aug-26",
+   "value": 420.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "01-1-2-meat",
+   "period": "on Jul. 2026",
+   "value": 2.5,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "01-1-2-meat",
+   "period": "on Aug. 2025",
+   "value": 32.5,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "01-1-2-meat",
+   "period": "1 month",
+   "value": 0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "01-1-2-meat",
+   "period": "12 months",
+   "value": 0.9,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.2 Meat 2% 316.9 409.5 420.0 2.5% 32.5% 0.1 0.9",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "Weights",
+   "value": 1.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "Aug-25",
+   "value": 220.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "Jul-26",
+   "value": 230.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "Aug-26",
+   "value": 232.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "on Jul. 2026",
+   "value": 0.8,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "on Aug. 2025",
+   "value": 5.1,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "01-1-4-milk-cheese-and-eggs",
+   "period": "12 months",
+   "value": 0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.4 Milk cheese and eggs 1% 220.7 230.1 232.0 0.8% 5.1% 0.0 0.1",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "01-1-7-vegetables",
+   "period": "Weights",
+   "value": 18.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "01-1-7-vegetables",
+   "period": "Aug-25",
+   "value": 268.5,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "01-1-7-vegetables",
+   "period": "Jul-26",
+   "value": 308.9,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "01-1-7-vegetables",
+   "period": "Aug-26",
+   "value": 329.2,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "01-1-7-vegetables",
+   "period": "on Jul. 2026",
+   "value": 6.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "01-1-7-vegetables",
+   "period": "on Aug. 2025",
+   "value": 22.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "01-1-7-vegetables",
+   "period": "1 month",
+   "value": 1.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "01-1-7-vegetables",
+   "period": "12 months",
+   "value": 5.4,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.1.7 Vegetables 18% 268.5 308.9 329.2 6.6% 22.6% 1.6 5.4",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "Weights",
+   "value": 1.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "Aug-25",
+   "value": 205.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "Jul-26",
+   "value": 222.2,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "Aug-26",
+   "value": 223.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "on Jul. 2026",
+   "value": 0.7,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "on Aug. 2025",
+   "value": 8.8,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "01-2-non-alcoholic-beverages",
+   "period": "12 months",
+   "value": 0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "01.2 Non-alcoholic beverages 1% 205.6 222.2 223.8 0.7% 8.8% 0.0 0.1",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "Weights",
+   "value": 7.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "Aug-25",
+   "value": 248.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "Jul-26",
+   "value": 272.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "Aug-26",
+   "value": 269.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "on Jul. 2026",
+   "value": -1.4,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "on Aug. 2025",
+   "value": 8.2,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "1 month",
+   "value": -0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "02-alcoholic-beverages-tobacco-and-narcotics",
+   "period": "12 months",
+   "value": 0.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "02 Alcoholic beverages tobacco and narcotics 7% 248.6 272.8 269.0 -1.4% 8.2% -0.1 0.7",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "03-clothing-and-footwear",
+   "period": "Weights",
+   "value": 5.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "03-clothing-and-footwear",
+   "period": "Aug-25",
+   "value": 173.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "03-clothing-and-footwear",
+   "period": "Jul-26",
+   "value": 181.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "03-clothing-and-footwear",
+   "period": "Aug-26",
+   "value": 181.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "03-clothing-and-footwear",
+   "period": "on Jul. 2026",
+   "value": 0.4,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "03-clothing-and-footwear",
+   "period": "on Aug. 2025",
+   "value": 5.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "03-clothing-and-footwear",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "03-clothing-and-footwear",
+   "period": "12 months",
+   "value": 0.2,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "03 Clothing and footwear 5% 173.1 181.1 181.7 0.4% 5.0% 0.0 0.2",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "Weights",
+   "value": 18.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "Aug-25",
+   "value": 155.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "Jul-26",
+   "value": 186.9,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "Aug-26",
+   "value": 186.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "on Jul. 2026",
+   "value": -0.4,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "on Aug. 2025",
+   "value": 19.9,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "1 month",
+   "value": -0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "04-housing-water-electricity-gas-and-other-fuels",
+   "period": "12 months",
+   "value": 2.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "04 Housing water, electricity, gas and other fuels 18% 155.3 186.9 186.1 -0.4% 19.9% -0.1 2.7",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "Weights",
+   "value": 3.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "Aug-25",
+   "value": 174.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "Jul-26",
+   "value": 189.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "Aug-26",
+   "value": 191.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "on Jul. 2026",
+   "value": 1.4,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "on Aug. 2025",
+   "value": 10.2,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "05-furnishings-household-equipment-and-routine-household-maintenance",
+   "period": "12 months",
+   "value": 0.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "05 Furnishings household equipment and routine household maintenance 3% 174.1 189.3 191.8 1.4% 10.2% 0.0 0.3",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "06-health",
+   "period": "Weights",
+   "value": 1.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "06-health",
+   "period": "Aug-25",
+   "value": 186.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "06-health",
+   "period": "Jul-26",
+   "value": 191.5,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "06-health",
+   "period": "Aug-26",
+   "value": 191.5,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "06-health",
+   "period": "on Jul. 2026",
+   "value": 0.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "06-health",
+   "period": "on Aug. 2025",
+   "value": 2.7,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "06-health",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "06-health",
+   "period": "12 months",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "06 Health 1% 186.6 191.5 191.5 0.0% 2.7% 0.0 0.0",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "07-transport",
+   "period": "Weights",
+   "value": 8.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "07-transport",
+   "period": "Aug-25",
+   "value": 180.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "07-transport",
+   "period": "Jul-26",
+   "value": 230.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "07-transport",
+   "period": "Aug-26",
+   "value": 230.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "07-transport",
+   "period": "on Jul. 2026",
+   "value": 0.1,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "07-transport",
+   "period": "on Aug. 2025",
+   "value": 27.5,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "07-transport",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "07-transport",
+   "period": "12 months",
+   "value": 1.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "07 Transport 8% 180.8 230.3 230.6 0.1% 27.5% 0.0 1.8",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "08-communication",
+   "period": "Weights",
+   "value": 2.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "08-communication",
+   "period": "Aug-25",
+   "value": 123.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "08-communication",
+   "period": "Jul-26",
+   "value": 125.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "08-communication",
+   "period": "Aug-26",
+   "value": 157.4,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "08-communication",
+   "period": "on Jul. 2026",
+   "value": 25.3,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "08-communication",
+   "period": "on Aug. 2025",
+   "value": 27.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "08-communication",
+   "period": "1 month",
+   "value": 0.3,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "08-communication",
+   "period": "12 months",
+   "value": 0.4,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "08 Communication 2% 123.3 125.6 157.4 25.3% 27.6% 0.3 0.4",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "09-recreation-and-culture",
+   "period": "Weights",
+   "value": 2.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "09-recreation-and-culture",
+   "period": "Aug-25",
+   "value": 161.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "09-recreation-and-culture",
+   "period": "Jul-26",
+   "value": 179.9,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "09-recreation-and-culture",
+   "period": "Aug-26",
+   "value": 180.5,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "09-recreation-and-culture",
+   "period": "on Jul. 2026",
+   "value": 0.4,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "09-recreation-and-culture",
+   "period": "on Aug. 2025",
+   "value": 11.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "09-recreation-and-culture",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "09-recreation-and-culture",
+   "period": "12 months",
+   "value": 0.2,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "09 Recreation and culture 2% 161.8 179.9 180.5 0.4% 11.6% 0.0 0.2",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "10-education",
+   "period": "Weights",
+   "value": 2.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "10-education",
+   "period": "Aug-25",
+   "value": 193.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "10-education",
+   "period": "Jul-26",
+   "value": 216.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "10-education",
+   "period": "Aug-26",
+   "value": 216.6,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "10-education",
+   "period": "on Jul. 2026",
+   "value": 0.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "10-education",
+   "period": "on Aug. 2025",
+   "value": 11.8,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "10-education",
+   "period": "1 month",
+   "value": 0.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "10-education",
+   "period": "12 months",
+   "value": 0.2,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "10 Education 2% 193.6 216.6 216.6 0.0% 11.8% 0.0 0.2",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "11-restaurants-and-hotels",
+   "period": "Weights",
+   "value": 6.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "11-restaurants-and-hotels",
+   "period": "Aug-25",
+   "value": 188.5,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "11-restaurants-and-hotels",
+   "period": "Jul-26",
+   "value": 211.0,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "11-restaurants-and-hotels",
+   "period": "Aug-26",
+   "value": 214.5,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "11-restaurants-and-hotels",
+   "period": "on Jul. 2026",
+   "value": 1.6,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "11-restaurants-and-hotels",
+   "period": "on Aug. 2025",
+   "value": 13.7,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "11-restaurants-and-hotels",
+   "period": "1 month",
+   "value": 0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "11-restaurants-and-hotels",
+   "period": "12 months",
+   "value": 0.8,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "11 Restaurants and hotels 6% 188.5 211.0 214.5 1.6% 13.7% 0.1 0.8",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  },
+  {
+   "indicator": "weights",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "Weights",
+   "value": 5.0,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_25",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "Aug-25",
+   "value": 149.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "jul_26",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "Jul-26",
+   "value": 162.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "aug_26",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "Aug-26",
+   "value": 165.7,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_jul_2026",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "on Jul. 2026",
+   "value": 2.3,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "on_aug_2025",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "on Aug. 2025",
+   "value": 10.7,
+   "unit": {
+    "en": "%",
+    "fr": "%"
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "ok",
+   "note": null
+  },
+  {
+   "indicator": "one_month",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "1 month",
+   "value": 0.1,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for one_month",
+    "fr": "unit 'None' not allowed for one_month"
+   }
+  },
+  {
+   "indicator": "twelve_months",
+   "area": "12-miscellaneous-goods-and-services",
+   "period": "12 months",
+   "value": 0.4,
+   "unit": {
+    "en": "",
+    "fr": ""
+   },
+   "page": 12,
+   "snippet": "12 Miscellaneous goods and services 5% 149.7 162.1 165.7 2.3% 10.7% 0.1 0.4",
+   "status": "warn",
+   "note": {
+    "en": "unit 'None' not allowed for twelve_months",
+    "fr": "unit 'None' not allowed for twelve_months"
+   }
+  }
+ ],
+ "indicators": {
+  "weights": {
+   "fr": "Weights",
+   "en": "Weights"
+  },
+  "aug_25": {
+   "fr": "Aug-25",
+   "en": "Aug-25"
+  },
+  "jul_26": {
+   "fr": "Jul-26",
+   "en": "Jul-26"
+  },
+  "aug_26": {
+   "fr": "Aug-26",
+   "en": "Aug-26"
+  },
+  "on_jul_2026": {
+   "fr": "on Jul. 2026",
+   "en": "on Jul. 2026"
+  },
+  "on_aug_2025": {
+   "fr": "on Aug. 2025",
+   "en": "on Aug. 2025"
+  },
+  "one_month": {
+   "fr": "1 month",
+   "en": "1 month"
+  },
+  "twelve_months": {
+   "fr": "12 months",
+   "en": "12 months"
+  }
+ },
+ "i18n": {
+  "en": {
+   "sourceDoc": "Source publication",
+   "tabOverview": "Overview",
+   "tabData": "Data & sources",
+   "filterLabel": "Areas",
+   "reset": "Reset",
+   "searchPh": "Search an indicator, an area, a year…",
+   "btnCsv": "Download CSV",
+   "btnJson": "Download JSON",
+   "thIndicator": "Indicator",
+   "thArea": "Area",
+   "thPeriod": "Period",
+   "thValue": "Value",
+   "thUnit": "Unit",
+   "thPage": "Page",
+   "thStatus": "Check",
+   "noRows": "No figure matches this search.",
+   "statusOk": "Verified",
+   "statusWarn": "To review",
+   "provLabel": "Read from the source document, page",
+   "calloutTitle": "Read this before reusing the figures",
+   "calloutBody": "These figures were extracted from a PDF by a language model and then checked automatically against the source text. Rows marked “To review” failed at least one check and have not been confirmed by a statistician. Always cite the original publication, not this dashboard.",
+   "dataTitle": "Data & sources",
+   "dataLede": "Every figure on this dashboard, with the page it came from and the line of text it was read from. Search, sort, open a row to see the source, export.",
+   "limTitle": "Limitations",
+   "methTitle": "How this dashboard was built",
+   "methBody": "Text was extracted from the PDF page by page. A rules-based reader and a language model each transcribed the tables independently, and every cell was checked for page provenance, quoted evidence, unit and range, reconciliation with published totals, and agreement between the two readings. The notebook, the prompts and the verification report are in the repository.",
+   "fSource": "Source",
+   "fLicence": "Licence",
+   "fBuilt": "Built with",
+   "fContact": "Contact",
+   "fBuiltBody": "Python, an LLM extraction pipeline, Chart.js. No tracking, no cookies, no server — a single HTML file.",
+   "stamp": "Dashboard generated on {date}. Figures are the responsibility of the source institution; the presentation is the responsibility of the team that built this page.",
+   "syntheticWarn": "Demonstration data — fictional country, for training purposes only.",
+   "kicker": "",
+   "title": "Consumer Price Index – Rwanda",
+   "subtitle": "",
+   "ovTitle": "Key indicators",
+   "ovLede": "The CPI components and their weights are presented for the latest periods.",
+   "limBody": "The indicators “one_month” and “twelve_months” have no unit defined, which is not allowed.",
+   "publisher": "National Institute of Statistics",
+   "period": ""
+  },
+  "fr": {
+   "sourceDoc": "Publication source",
+   "tabOverview": "Vue d'ensemble",
+   "tabData": "Données et sources",
+   "filterLabel": "Zones",
+   "reset": "Réinitialiser",
+   "searchPh": "Chercher un indicateur, une zone, une année…",
+   "btnCsv": "Télécharger le CSV",
+   "btnJson": "Télécharger le JSON",
+   "thIndicator": "Indicateur",
+   "thArea": "Zone",
+   "thPeriod": "Période",
+   "thValue": "Valeur",
+   "thUnit": "Unité",
+   "thPage": "Page",
+   "thStatus": "Contrôle",
+   "noRows": "Aucun chiffre ne correspond à cette recherche.",
+   "statusOk": "Vérifié",
+   "statusWarn": "À revoir",
+   "provLabel": "Lu dans le document source, page",
+   "calloutTitle": "À lire avant de réutiliser les chiffres",
+   "calloutBody": "Ces chiffres ont été extraits d'un PDF par un modèle de langage, puis contrôlés automatiquement contre le texte source. Les lignes marquées « À revoir » ont échoué à au moins un contrôle et n'ont pas été confirmées par un statisticien. Citez toujours la publication d'origine, pas ce tableau de bord.",
+   "dataTitle": "Données et sources",
+   "dataLede": "Tous les chiffres de ce tableau de bord, avec la page dont ils proviennent et la ligne de texte dont ils ont été lus. Cherchez, triez, ouvrez une ligne pour voir la source, exportez.",
+   "limTitle": "Limites",
+   "methTitle": "Comment ce tableau de bord a été construit",
+   "methBody": "Le texte a été extrait du PDF page par page. Un lecteur à base de règles et un modèle de langage ont transcrit les tableaux indépendamment, et chaque cellule a été contrôlée : provenance de page, citation vérifiée, unité et plage, réconciliation avec les totaux publiés, et accord entre les deux lectures. Le notebook, les prompts et le rapport de vérification sont dans le dépôt.",
+   "fSource": "Source",
+   "fLicence": "Licence",
+   "fBuilt": "Réalisé avec",
+   "fContact": "Contact",
+   "fBuiltBody": "Python, une chaîne d'extraction par LLM, Chart.js. Aucun traceur, aucun cookie, aucun serveur — un seul fichier HTML.",
+   "stamp": "Tableau de bord généré le {date}. Les chiffres relèvent de la responsabilité de l'institution source ; la présentation relève de la responsabilité de l'équipe qui a construit cette page.",
+   "syntheticWarn": "Données de démonstration — pays fictif, à usage pédagogique uniquement.",
+   "kicker": "",
+   "title": "Indice des prix à la consommation – Rwanda",
+   "subtitle": "",
+   "ovTitle": "Indicateurs clés",
+   "ovLede": "Les composantes de l'IPC et leurs poids sont présentés pour les dernières périodes.",
+   "limBody": "Les indicateurs « one_month » et « twelve_months » n'ont pas d'unité définie, ce qui n'est pas autorisé.",
+   "publisher": "Institut National de la Statistique",
+   "period": ""
+  }
+ },
+ "overviewScatter": {
+  "x": "weights",
+  "y": "on_jul_2026",
+  "title": {
+   "en": "on Jul. 2026 against Weights",
+   "fr": "on Jul. 2026 et Weights"
+  },
+  "sub": {
+   "en": "One point per area — an association, not a causal claim",
+   "fr": "Un point par zone — une association, pas une relation causale"
+  },
+  "src": {
+   "en": "No significance test performed.",
+   "fr": "Aucun test de significativité réalisé."
+  }
+ }
+}/*__ENDDATA__*/;
+
+/* ==========================================================================
+   Runtime. Everything on the page is built from DATA — no view is hard-coded,
+   so the same file works for three indicators or for thirty.
+   ========================================================================== */
+const RAMP  = ["#00553A","#00704A","#00A86A","#0E7C86","#D49A00","#C4621D","#9ED9C0","#B83B2E"];
+const GREEN = "#00A86A", PALE = "#9ED9C0";
+const scheme = window.matchMedia?.("(prefers-color-scheme: dark)");
+const dark = () => !!scheme?.matches;
+const SLATE = () => dark() ? "#9FADA7" : "#5E6964";
+const SAGE  = () => dark() ? "#2B3A34" : "#D5DED9";
+const GRID  = () => dark() ? "#22302A" : "#EDF2EF";
+scheme?.addEventListener?.("change", () => drawAll());
+
+let LANG = (DATA.meta.defaultLang) ||
+           ((navigator.language || "en").toLowerCase().startsWith("fr") ? "fr" : "en");
+let TAB = "overview";
+let SELECTED = new Set(DATA.areas.map(a => a.id));
+let SORT = {key:null, dir:1};
+const charts = {};
+
+const T   = k => (DATA.i18n[LANG] && DATA.i18n[LANG][k]) ?? (DATA.i18n.en?.[k] ?? k);
+const loc = v => (v && typeof v === "object" && !Array.isArray(v)) ? (v[LANG] ?? v.en ?? "") : (v ?? "");
+const areaOf = id => { const a = DATA.areas.find(x => x.id === id); return a ? loc(a) : id; };
+const indOf  = id => loc(DATA.indicators?.[id]) || id;
+const views  = () => DATA.views || [];
+const nf = (v, d) => new Intl.NumberFormat(LANG === "fr" ? "fr-FR" : "en-GB",
+  {minimumFractionDigits:d, maximumFractionDigits:d}).format(v);
+const fmt = v => (Number.isInteger(v) && Math.abs(v) >= 1000) ? nf(v,0) : nf(v,1);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function colorFor(aid){
+  const a = DATA.areas.find(x => x.id === aid);
+  if (a && a.national) return dark() ? "#E8EFEB" : "#231F20";
+  const i = DATA.areas.filter(x => !x.national).findIndex(x => x.id === aid);
+  return RAMP[i % RAMP.length];
+}
+
+/* ---------- facts: derive from series if the pipeline supplied none ---------- */
+const FACTS = (DATA.facts && DATA.facts.length) ? DATA.facts : (() => {
+  const out = [];
+  for (const [key, s] of Object.entries(DATA.series || {}))
+    s.periods.forEach((p, i) => {
+      for (const [aid, arr] of Object.entries(s.values))
+        if (arr[i] != null) out.push({indicator:key, area:aid, period:p, value:arr[i],
+                                      unit:s.unit, page:null, snippet:null, status:"ok"});
+    });
+  return out;
+})();
+
+/* =========================== chrome =========================== */
+function renderTabs(){
+  const tabs = [["overview", T("tabOverview")],
+                ...views().map(v => [v.id, loc(v.tab) || indOf(v.id)]),
+                ["data", T("tabData")]];
+  const short = t => t.length > 30 ? t.slice(0, 28).trimEnd() + "…" : t;
+  document.getElementById("tabs").innerHTML = tabs.map(([id, label]) =>
+    `<button role="tab" data-tab="${id}" aria-selected="${id === TAB}" title="${esc(label)}">${esc(short(label))}</button>`
+  ).join("");
+  document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+    TAB = b.dataset.tab; renderTabs(); renderPanels();
+    window.scrollTo({top:0, behavior:"instant"});
+  });
+}
+
+function chartCard(v, idSuffix = ""){
+  return `<div class="card">
+    <h3>${esc(loc(v.title) || indOf(v.id))}</h3>
+    <p class="sub">${esc(loc(v.sub) || "")}</p>
+    <div class="chartbox${idSuffix ? "" : " tall"}"><canvas id="ch-${v.id}${idSuffix}"></canvas></div>
+    <p class="src">${esc(loc(v.src) || "")}</p></div>`;
+}
+
+function renderPanels(){
+  const host = document.getElementById("panels");
+  if (TAB === "overview"){
+    const first = views()[0], second = views()[1];
+    host.innerHTML = `
+      <h2>${esc(T("ovTitle"))}</h2><p class="lede">${esc(T("ovLede"))}</p>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid two">
+        ${first ? chartCard(first, "-ov") : ""}
+        ${DATA.overviewScatter ? scatterCard() : (second ? chartCard(second, "-ov2") : "")}
+      </div>`;
+    renderKpis();
+  } else if (TAB === "data"){
+    host.innerHTML = dataPanel();
+    wireTable();
+  } else {
+    const v = views().find(x => x.id === TAB);
+    host.innerHTML = `
+      <h2>${esc(loc(v.title) || indOf(v.id))}</h2>
+      <p class="lede">${esc(loc(v.lede) || "")}</p>
+      <div class="filters" id="filters"></div>
+      ${chartCard(v)}`;
+    renderFilters();
+  }
+  drawAll();
+}
+
+function scatterCard(){
+  const s = DATA.overviewScatter;
+  return `<div class="card">
+    <h3>${esc(loc(s.title))}</h3><p class="sub">${esc(loc(s.sub))}</p>
+    <div class="chartbox"><canvas id="ch-scatter"></canvas></div>
+    <p class="src">${esc(loc(s.src) || "")}</p></div>`;
+}
+
+function dataPanel(){
+  return `
+    <h2>${esc(T("dataTitle"))}</h2><p class="lede">${esc(T("dataLede"))}</p>
+    <div class="callout"><h3>${esc(T("calloutTitle"))}</h3><p>${esc(T("calloutBody"))}</p></div>
+    <div class="tablebar">
+      <input type="search" id="q" placeholder="${esc(T("searchPh"))}" aria-label="${esc(T("searchPh"))}">
+      <button class="btn ghost" id="csv">${esc(T("btnCsv"))}</button>
+      <button class="btn ghost" id="json">${esc(T("btnJson"))}</button>
+    </div>
+    <div class="tscroll"><table id="tbl"><thead><tr>
+      <th data-key="indicator">${esc(T("thIndicator"))}</th>
+      <th data-key="area">${esc(T("thArea"))}</th>
+      <th data-key="period">${esc(T("thPeriod"))}</th>
+      <th data-key="value" class="num">${esc(T("thValue"))}</th>
+      <th data-key="unit">${esc(T("thUnit"))}</th>
+      <th data-key="page">${esc(T("thPage"))}</th>
+      <th data-key="status">${esc(T("thStatus"))}</th>
+    </tr></thead><tbody></tbody></table>
+    <div class="empty" id="noRows" hidden>${esc(T("noRows"))}</div></div>
+    <div style="height:22px"></div>
+    <div class="notes">
+      <h3>${esc(T("limTitle"))}</h3><p>${esc(T("limBody"))}</p>
+      <h3>${esc(T("methTitle"))}</h3><p>${esc(T("methBody"))}</p>
+    </div>`;
+}
+
+/* =========================== KPIs & filters =========================== */
+function renderKpis(){
+  const host = document.getElementById("kpis");
+  if (!host) return;
+  host.innerHTML = (DATA.kpis || []).map(k => {
+    let delta = "";
+    if (k.delta != null){
+      const good = k.good === (k.delta > 0 ? "up" : "down");
+      const cls = k.delta === 0 ? "flat" : (good ? "down" : "up");
+      const arrow = k.delta === 0 ? "=" : (k.delta > 0 ? "▲" : "▼");
+      const sign = k.delta > 0 ? "+" : "−";
+      delta = `<div class="delta ${cls}">${arrow} ${sign}${nf(Math.abs(k.delta),1)} ${esc(loc(k.deltaLabel))}</div>`;
+    }
+    return `<div class="kpi${k.highlight ? " hi" : ""}">
+      <p class="lbl">${esc(loc(k.labels))}</p>
+      <div class="val">${fmt(k.value)}<small>${esc(loc(k.unit))}</small></div>${delta}</div>`;
+  }).join("");
+}
+
+function renderFilters(){
+  const box = document.getElementById("filters");
+  if (!box) return;
+  box.innerHTML = `<span class="flabel">${esc(T("filterLabel"))}</span>` +
+    DATA.areas.map(a => `<button class="chip" data-area="${a.id}" aria-pressed="${SELECTED.has(a.id)}">${esc(loc(a))}</button>`).join("") +
+    `<button class="chip reset" id="chipReset">${esc(T("reset"))}</button>`;
+  box.querySelectorAll("[data-area]").forEach(b => b.onclick = () => {
+    SELECTED.has(b.dataset.area) ? SELECTED.delete(b.dataset.area) : SELECTED.add(b.dataset.area);
+    if (!SELECTED.size) SELECTED = new Set(DATA.areas.map(a => a.id));
+    renderFilters(); drawAll();
+  });
+  box.querySelector("#chipReset").onclick = () => {
+    SELECTED = new Set(DATA.areas.map(a => a.id)); renderFilters(); drawAll();
+  };
+}
+
+/* =========================== charts =========================== */
+const baseOpts = () => ({
+  responsive:true, maintainAspectRatio:false,
+  interaction:{mode:"nearest", intersect:false},
+  plugins:{
+    legend:{position:"bottom", labels:{boxWidth:11, boxHeight:11, usePointStyle:true,
+      pointStyle:"circle", color:SLATE(), font:{size:12, family:"Calibri, Carlito, sans-serif"}}},
+    tooltip:{backgroundColor:"#231F20", padding:10, cornerRadius:6,
+      titleFont:{size:12.5}, bodyFont:{size:12.5}}
+  },
+  scales:{
+    x:{grid:{display:false}, border:{color:SAGE()}, ticks:{color:SLATE(), font:{size:11.5}}},
+    y:{grid:{color:GRID()}, border:{display:false}, ticks:{color:SLATE(), font:{size:11.5}}}
+  }
+});
+
+function unitLabel(s){ return loc(s.unit) || ""; }
+
+function drawView(v, suffix = ""){
+  const cv = document.getElementById(`ch-${v.id}${suffix}`);
+  const s = DATA.series[v.id];
+  if (!cv || !s) return;
+  const key = `ch-${v.id}${suffix}`;
+  const areas = DATA.areas.filter(a => s.values[a.id] && (suffix ? true : SELECTED.has(a.id)));
+  const o = baseOpts();
+  const u = unitLabel(s);
+  o.plugins.tooltip.callbacks = {label: c => {
+    const val = c.parsed.y ?? c.parsed.x;
+    return `${c.dataset.label ? c.dataset.label + ": " : ""}${fmt(val)} ${u}`;
+  }};
+  if (u) o.scales.y.title = {display:true, text:u, color:SLATE(), font:{size:11.5}};
+  charts[key]?.destroy();
+
+  if (v.chart === "line" || (!v.chart && s.periods.length > 2)){
+    charts[key] = new Chart(cv, {type:"line", data:{labels:s.periods,
+      datasets: areas.map(a => ({
+        label: loc(a), data: s.values[a.id],
+        borderColor: colorFor(a.id), backgroundColor: colorFor(a.id),
+        borderWidth: a.national ? 3 : 2, borderDash: a.national ? [6,3] : [],
+        pointRadius:3, pointHoverRadius:6, tension:.28, spanGaps:true
+      }))}, options:o});
+    return;
+  }
+  if (v.chart === "grouped" || (!v.chart && s.periods.length === 2)){
+    charts[key] = new Chart(cv, {type:"bar", data:{
+      labels: areas.map(a => loc(a)),
+      datasets: s.periods.map((p, i) => ({
+        label: p, data: areas.map(a => s.values[a.id][i]),
+        backgroundColor: i === s.periods.length - 1 ? GREEN : PALE,
+        borderRadius:4, barPercentage:.82}))}, options:o});
+    return;
+  }
+  // single column → ranked horizontal bars
+  const idx = s.periods.length - 1;
+  const rows = areas.filter(a => !a.national)
+    .map(a => ({label: loc(a), v: s.values[a.id][idx], id: a.id}))
+    .filter(r => r.v != null).sort((x, y) => y.v - x.v);
+  o.indexAxis = "y";
+  o.plugins.legend.display = false;
+  o.scales.x.grid = {color:GRID()};
+  o.scales.y.grid = {display:false};
+  delete o.scales.y.title;
+  charts[key] = new Chart(cv, {type:"bar", data:{labels: rows.map(r => r.label),
+    datasets:[{data: rows.map(r => r.v), backgroundColor: rows.map(r => colorFor(r.id)),
+               borderRadius:4, barPercentage:.72}]}, options:o});
+}
+
+function drawScatter(){
+  const cfg = DATA.overviewScatter, cv = document.getElementById("ch-scatter");
+  if (!cfg || !cv) return;
+  const sx = DATA.series[cfg.x], sy = DATA.series[cfg.y];
+  if (!sx || !sy) return;
+  const xi = sx.periods.length - 1, yi = sy.periods.length - 1;
+  const pts = DATA.areas.filter(a => !a.national && sx.values[a.id] && sy.values[a.id])
+    .map(a => ({x:sx.values[a.id][xi], y:sy.values[a.id][yi], label:loc(a), id:a.id}))
+    .filter(p => p.x != null && p.y != null);
+  const o = baseOpts();
+  o.plugins.legend.display = false;
+  o.scales.x.grid = {color:GRID()};
+  o.scales.x.title = {display:true, text:indOf(cfg.x), color:SLATE(), font:{size:11}};
+  o.scales.y.title = {display:true, text:indOf(cfg.y), color:SLATE(), font:{size:11}};
+  o.plugins.tooltip.callbacks = {label: c => `${c.raw.label} — ${fmt(c.parsed.x)} / ${fmt(c.parsed.y)}`};
+  charts["ch-scatter"]?.destroy();
+  charts["ch-scatter"] = new Chart(cv, {type:"scatter", data:{datasets:[{
+    data: pts, pointRadius:8, pointHoverRadius:11,
+    backgroundColor: pts.map(p => colorFor(p.id))}]}, options:o});
+}
+
+function drawAll(){
+  views().forEach(v => { drawView(v); drawView(v, "-ov"); drawView(v, "-ov2"); });
+  drawScatter();
+}
+
+/* =========================== table =========================== */
+function visibleRows(){
+  const q = (document.getElementById("q")?.value || "").trim().toLowerCase();
+  let rows = FACTS.map(f => ({...f, indicatorLabel: indOf(f.indicator),
+                              areaLabel: areaOf(f.area), unitLabel: loc(f.unit)}));
+  if (q) rows = rows.filter(r => [r.indicatorLabel, r.areaLabel, r.period, String(r.value),
+                                  r.unitLabel].join(" ").toLowerCase().includes(q));
+  if (SORT.key){
+    const pick = (r, k) => k === "value" ? r.value
+      : k === "indicator" ? r.indicatorLabel : k === "area" ? r.areaLabel
+      : k === "unit" ? r.unitLabel : (r[k] ?? "");
+    rows.sort((a, b) => {
+      const va = pick(a, SORT.key), vb = pick(b, SORT.key);
+      return (va > vb ? 1 : va < vb ? -1 : 0) * SORT.dir;
+    });
+  }
+  return rows;
+}
+
+function renderTable(){
+  const tb = document.querySelector("#tbl tbody");
+  if (!tb) return;
+  const rows = visibleRows();
+  document.getElementById("noRows").hidden = rows.length > 0;
+  tb.innerHTML = rows.map((r, i) => {
+    const ok = r.status !== "warn";
+    const badge = `<span class="badge ${ok ? "ok" : "warn"}">${esc(ok ? T("statusOk") : T("statusWarn"))}</span>`;
+    const head = (r.snippet || r.note)
+      ? `<button class="rowbtn" data-row="${i}" aria-expanded="false">${esc(r.indicatorLabel)}</button>`
+      : esc(r.indicatorLabel);
+    return `<tr><td>${head}</td><td>${esc(r.areaLabel)}</td><td>${esc(r.period)}</td>
+      <td class="num">${fmt(r.value)}</td><td>${esc(r.unitLabel)}</td>
+      <td>${r.page ?? "—"}</td><td>${badge}</td></tr>`;
+  }).join("");
+  tb.querySelectorAll(".rowbtn").forEach(b => b.onclick = () => toggleProv(b, rows));
+  document.querySelectorAll("#tbl thead th").forEach(th => {
+    th.setAttribute("aria-sort", SORT.key === th.dataset.key
+      ? (SORT.dir === 1 ? "ascending" : "descending") : "none");
+    th.onclick = () => { SORT = {key:th.dataset.key,
+      dir: SORT.key === th.dataset.key ? -SORT.dir : 1}; renderTable(); };
+  });
+}
+
+function toggleProv(btn, rows){
+  const tr = btn.closest("tr");
+  const open = btn.getAttribute("aria-expanded") === "true";
+  if (tr.nextElementSibling?.classList.contains("prov")) tr.nextElementSibling.remove();
+  tr.classList.toggle("open", !open);
+  btn.setAttribute("aria-expanded", String(!open));
+  if (open) return;
+  const r = rows[Number(btn.dataset.row)];
+  const el = document.createElement("tr");
+  el.className = "prov";
+  const note = r.note ? `<p style="margin:10px 0 0;color:#8A6400"><strong>⚑</strong> ${esc(loc(r.note))}</p>` : "";
+  const quote = r.snippet ? `<q>${esc(r.snippet)}</q>` : "";
+  el.innerHTML = `<td colspan="7"><strong>${esc(T("provLabel"))} ${r.page ?? "—"}</strong>${quote}${note}</td>`;
+  tr.after(el);
+}
+
+function download(name, text, mime){
+  const url = URL.createObjectURL(new Blob(["\ufeff" + text], {type:mime}));
+  const a = Object.assign(document.createElement("a"), {href:url, download:name});
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+function wireTable(){
+  renderTable();
+  document.getElementById("q").addEventListener("input", renderTable);
+  document.getElementById("csv").onclick = () => {
+    const head = ["indicator","area","period","value","unit","page","status","source_line"];
+    const body = visibleRows().map(r => [r.indicatorLabel, r.areaLabel, r.period, r.value,
+      r.unitLabel, r.page ?? "", r.status ?? "", (r.snippet ?? "").replace(/\s+/g," ")]);
+    download(`dashboard_data_${LANG}.csv`,
+      [head, ...body].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n"),
+      "text/csv;charset=utf-8");
+  };
+  document.getElementById("json").onclick = () =>
+    download("dashboard_data.json", JSON.stringify(DATA, null, 2), "application/json");
+}
+
+/* =========================== language =========================== */
+function applyLang(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach(el =>
+    el.textContent = T(el.dataset.i18n).replace("{date}", DATA.meta.generated || ""));
+  document.querySelectorAll(".lang button").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
+  document.title = `${T("title")} · ${loc(DATA.meta.country)}`;
+  const link = document.getElementById("srcLink");
+  link.href = DATA.meta.sourceUrl || "#";
+  if (!DATA.meta.sourceUrl || DATA.meta.sourceUrl === "#") link.removeAttribute("target");
+  document.getElementById("fSourceBody").textContent =
+    [loc(DATA.meta.publisher), loc(DATA.meta.docTitle), loc(DATA.meta.period)]
+      .filter(Boolean).join(" — ");
+  document.getElementById("fLicenceBody").textContent = loc(DATA.meta.licence);
+  document.getElementById("fContactBody").textContent = loc(DATA.meta.contact);
+  const sb = document.getElementById("synthBar");
+  sb.hidden = !DATA.meta.synthetic;
+  sb.textContent = T("syntheticWarn");
+  renderTabs(); renderPanels();
+}
+
+document.querySelectorAll(".lang button").forEach(b =>
+  b.onclick = () => { LANG = b.dataset.lang; applyLang(); });
+
+applyLang();
+</script>
+</body>
+</html>
