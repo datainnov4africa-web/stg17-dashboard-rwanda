@@ -1,0 +1,145 @@
+indicator,area,period,value,unit,page,model,provenance,evidence,unit_range,arithmetic,cross_read,status,reason
+weights,00 GENERAL INDEX,Weights,100.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,00 GENERAL INDEX,Aug-25,208.3,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,00 GENERAL INDEX,Jul-26,235.3,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,00 GENERAL INDEX,Aug-26,241.4,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,00 GENERAL INDEX,on Jul. 2026,2.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,00 GENERAL INDEX,on Aug. 2025,15.9,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,00 GENERAL INDEX,1 month,2.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+twelve_months,00 GENERAL INDEX,12 months,15.9,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+weights,01 Food and non-alcoholic beverages,Weights,39.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,01 Food and non-alcoholic beverages,Aug-25,254.4,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,01 Food and non-alcoholic beverages,Jul-26,283.7,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,01 Food and non-alcoholic beverages,Aug-26,296.8,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,01 Food and non-alcoholic beverages,on Jul. 2026,4.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,01 Food and non-alcoholic beverages,on Aug. 2025,16.7,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,01 Food and non-alcoholic beverages,1 month,2.2,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,01 Food and non-alcoholic beverages,12 months,7.9,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,01.1.1 Bread and cereals,Weights,7.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,01.1.1 Bread and cereals,Aug-25,221.8,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,01.1.1 Bread and cereals,Jul-26,228.7,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,01.1.1 Bread and cereals,Aug-26,231.0,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,01.1.1 Bread and cereals,on Jul. 2026,1.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,01.1.1 Bread and cereals,on Aug. 2025,4.2,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,01.1.1 Bread and cereals,1 month,0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,01.1.1 Bread and cereals,12 months,0.3,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,01.1.2 Meat,Weights,2.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,01.1.2 Meat,Aug-25,316.9,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,01.1.2 Meat,Jul-26,409.5,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,01.1.2 Meat,Aug-26,420.0,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,01.1.2 Meat,on Jul. 2026,2.5,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,01.1.2 Meat,on Aug. 2025,32.5,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,01.1.2 Meat,1 month,0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,01.1.2 Meat,12 months,0.9,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,01.1.4 Milk cheese and eggs,Weights,1.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,01.1.4 Milk cheese and eggs,Aug-25,220.7,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,01.1.4 Milk cheese and eggs,Jul-26,230.1,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,01.1.4 Milk cheese and eggs,Aug-26,232.0,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,01.1.4 Milk cheese and eggs,on Jul. 2026,0.8,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,01.1.4 Milk cheese and eggs,on Aug. 2025,5.1,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,01.1.4 Milk cheese and eggs,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,01.1.4 Milk cheese and eggs,12 months,0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,01.1.7 Vegetables,Weights,18.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,01.1.7 Vegetables,Aug-25,268.5,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,01.1.7 Vegetables,Jul-26,308.9,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,01.1.7 Vegetables,Aug-26,329.2,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,01.1.7 Vegetables,on Jul. 2026,6.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,01.1.7 Vegetables,on Aug. 2025,22.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,01.1.7 Vegetables,1 month,1.6,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,01.1.7 Vegetables,12 months,5.4,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,01.2 Non-alcoholic beverages,Weights,1.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,01.2 Non-alcoholic beverages,Aug-25,205.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,01.2 Non-alcoholic beverages,Jul-26,222.2,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,01.2 Non-alcoholic beverages,Aug-26,223.8,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,01.2 Non-alcoholic beverages,on Jul. 2026,0.7,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,01.2 Non-alcoholic beverages,on Aug. 2025,8.8,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,01.2 Non-alcoholic beverages,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,01.2 Non-alcoholic beverages,12 months,0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,02 Alcoholic beverages tobacco and narcotics,Weights,7.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,02 Alcoholic beverages tobacco and narcotics,Aug-25,248.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,02 Alcoholic beverages tobacco and narcotics,Jul-26,272.8,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,02 Alcoholic beverages tobacco and narcotics,Aug-26,269.0,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,02 Alcoholic beverages tobacco and narcotics,on Jul. 2026,-1.4,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,02 Alcoholic beverages tobacco and narcotics,on Aug. 2025,8.2,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,02 Alcoholic beverages tobacco and narcotics,1 month,-0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,02 Alcoholic beverages tobacco and narcotics,12 months,0.7,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,03 Clothing and footwear,Weights,5.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,03 Clothing and footwear,Aug-25,173.1,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,03 Clothing and footwear,Jul-26,181.1,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,03 Clothing and footwear,Aug-26,181.7,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,03 Clothing and footwear,on Jul. 2026,0.4,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,03 Clothing and footwear,on Aug. 2025,5.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,03 Clothing and footwear,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,03 Clothing and footwear,12 months,0.2,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,"04 Housing water, electricity, gas and other fuels",Weights,18.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,"04 Housing water, electricity, gas and other fuels",Aug-25,155.3,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,"04 Housing water, electricity, gas and other fuels",Jul-26,186.9,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,"04 Housing water, electricity, gas and other fuels",Aug-26,186.1,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,"04 Housing water, electricity, gas and other fuels",on Jul. 2026,-0.4,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,"04 Housing water, electricity, gas and other fuels",on Aug. 2025,19.9,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,"04 Housing water, electricity, gas and other fuels",1 month,-0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,"04 Housing water, electricity, gas and other fuels",12 months,2.7,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,05 Furnishings household equipment and routine household maintenance,Weights,3.0,%,12,openai/gpt-oss-120b,True,True,True,True,no-row,verified,
+aug_25,05 Furnishings household equipment and routine household maintenance,Aug-25,174.1,,12,openai/gpt-oss-120b,True,True,True,True,no-row,verified,
+jul_26,05 Furnishings household equipment and routine household maintenance,Jul-26,189.3,,12,openai/gpt-oss-120b,True,True,True,True,no-row,verified,
+aug_26,05 Furnishings household equipment and routine household maintenance,Aug-26,191.8,,12,openai/gpt-oss-120b,True,True,True,True,no-row,verified,
+on_jul_2026,05 Furnishings household equipment and routine household maintenance,on Jul. 2026,1.4,%,12,openai/gpt-oss-120b,True,True,True,True,no-row,verified,
+on_aug_2025,05 Furnishings household equipment and routine household maintenance,on Aug. 2025,10.2,%,12,openai/gpt-oss-120b,True,True,True,True,no-row,verified,
+one_month,05 Furnishings household equipment and routine household maintenance,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,no-row,review,unit 'None' not allowed for one_month
+twelve_months,05 Furnishings household equipment and routine household maintenance,12 months,0.3,,12,openai/gpt-oss-120b,True,True,False,True,no-row,review,unit 'None' not allowed for twelve_months
+weights,06 Health,Weights,1.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,06 Health,Aug-25,186.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,06 Health,Jul-26,191.5,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,06 Health,Aug-26,191.5,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,06 Health,on Jul. 2026,0.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,06 Health,on Aug. 2025,2.7,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,06 Health,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,06 Health,12 months,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,07 Transport,Weights,8.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,07 Transport,Aug-25,180.8,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,07 Transport,Jul-26,230.3,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,07 Transport,Aug-26,230.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,07 Transport,on Jul. 2026,0.1,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,07 Transport,on Aug. 2025,27.5,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,07 Transport,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,07 Transport,12 months,1.8,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,08 Communication,Weights,2.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,08 Communication,Aug-25,123.3,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,08 Communication,Jul-26,125.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,08 Communication,Aug-26,157.4,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,08 Communication,on Jul. 2026,25.3,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,08 Communication,on Aug. 2025,27.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,08 Communication,1 month,0.3,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,08 Communication,12 months,0.4,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,09 Recreation and culture,Weights,2.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,09 Recreation and culture,Aug-25,161.8,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,09 Recreation and culture,Jul-26,179.9,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,09 Recreation and culture,Aug-26,180.5,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,09 Recreation and culture,on Jul. 2026,0.4,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,09 Recreation and culture,on Aug. 2025,11.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,09 Recreation and culture,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,09 Recreation and culture,12 months,0.2,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,10 Education,Weights,2.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,10 Education,Aug-25,193.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,10 Education,Jul-26,216.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,10 Education,Aug-26,216.6,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,10 Education,on Jul. 2026,0.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,10 Education,on Aug. 2025,11.8,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,10 Education,1 month,0.0,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,10 Education,12 months,0.2,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,11 Restaurants and hotels,Weights,6.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,11 Restaurants and hotels,Aug-25,188.5,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,11 Restaurants and hotels,Jul-26,211.0,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,11 Restaurants and hotels,Aug-26,214.5,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,11 Restaurants and hotels,on Jul. 2026,1.6,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,11 Restaurants and hotels,on Aug. 2025,13.7,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,11 Restaurants and hotels,1 month,0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,11 Restaurants and hotels,12 months,0.8,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
+weights,12 Miscellaneous goods and services,Weights,5.0,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_25,12 Miscellaneous goods and services,Aug-25,149.7,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+jul_26,12 Miscellaneous goods and services,Jul-26,162.1,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+aug_26,12 Miscellaneous goods and services,Aug-26,165.7,,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_jul_2026,12 Miscellaneous goods and services,on Jul. 2026,2.3,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+on_aug_2025,12 Miscellaneous goods and services,on Aug. 2025,10.7,%,12,openai/gpt-oss-120b,True,True,True,True,row-only,verified,
+one_month,12 Miscellaneous goods and services,1 month,0.1,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for one_month
+twelve_months,12 Miscellaneous goods and services,12 months,0.4,,12,openai/gpt-oss-120b,True,True,False,True,row-only,review,unit 'None' not allowed for twelve_months
